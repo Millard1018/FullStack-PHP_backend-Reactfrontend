@@ -23,7 +23,21 @@ class TaskController extends Controller
     //PUT/PATCH Update all Task or sspecific task
     public function update(Request $request, $id) {
         $task = Task::findOrFail($id);
-        $task->update($request->only(['title', 'completed']));
+
+        $data = [];
+
+        if($request->filled('title')) {
+            $data['title'] = $request->input(['title']);
+        }
+
+        if($request->filled('completed')) {
+            $data['completed'] = $request->input(['completed']);
+        }
+
+        if(!empty($data)) {
+            $task->update($data);
+        }
+        
         return $task;
     }
 
