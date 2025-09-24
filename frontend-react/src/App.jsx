@@ -104,9 +104,18 @@ function App() {
     setRefresh(!refresh);
   }
 
+  useEffect(() => {
+    if (showConfirmation) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [showConfirmation]);
+
+
   return (
     <>
-      <div className=" flex flex-col items-center bg-slate-200 space-y-[10vh]" >
+      <div className={` flex flex-col items-center bg-slate-200 space-y-[10vh] `} >
         <h1 className="font-bold text-3xl" >Task Manager</h1>
         <div className="bg-white p-10 rounded-3xl" >
           {tasks?.map(task => (
