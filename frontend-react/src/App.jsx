@@ -116,16 +116,15 @@ function App() {
   return (
     <>
       <div className={` flex flex-col items-center bg-slate-200 space-y-[10vh] `} >
-        <h1 className="font-bold text-3xl" >Task Manager</h1>
-        <div className="bg-white p-10 rounded-3xl" >
+        <h1 className="font-bold text-3xl mt-[5vh]" >Task Manager</h1>
+        <div className="bg-white p-10 rounded-3xl shadow-xl" >
           {tasks?.map(task => (
-            <div className="flex justify-center items-center space-x-[3vw] space-y-[3vh]" key={task.id}>
-              <div className="flex space-x-[3vw] mt-[2vh] flex-1">
-
+            <div className="flex justify-center items-center mb-[3vh] bg-slate-200 shadow-lg rounded-xl p-3" key={task.id}>
+              <div className="flex space-x-[3vw] flex-1">
                 {(editTask !== task.id) && <p className={`font-bold text-xl flex-1`} >{task.title}</p>}
                 {(editTask === task.id) && <input type="text" placeholder={task.title} value={update.title} onChange={(e) => setUpdate(prev => ({...prev, 'id': task.id, 'title': e.target.value,}))} 
-                className="p-[0.5vh] flex-1"  />}
-                <button className="flex-4"
+                className="w-[20vh] bg-slate-200 outline-none border-none"  />}
+                <button className="flex-2 "
                   onClick={() => setEditTask(prev => prev === task.id ? '' : task.id)}>
                   <Pencil className="active:opacity-100 hover:opacity-70" />
                 </button>
@@ -136,25 +135,25 @@ function App() {
                 <input type="checkbox" checked={update.id === task.id ? checkbox : task.completed} onChange={(e) => {
                   setCheckbox(e.target.checked);
                   setUpdate(prev => ({...prev, 'id': task.id, 'completed': e.target.checked}));
-                  }} className="w-[3vw] h-[3vh] mt-[1vh]" />
+                  }} className="w-[3vw] h-[3vh] mt-[1vh] ml-[2vw]" />
                 <button onClick={() => checkUpdate(task.id, task.completed) ? updateTask(task.id) : alert("Unable to update, you must edit title or un/tick checkbox first")} 
                 className="bg-blue-400 p-2 rounded-3xl hover:bg-blue-500 active:bg-blue-600" >Update</button>
                 <button onClick={() => {setShowConfirmation(true); setDeleteID(task.id)}} 
                 className="bg-red-400 p-2 rounded-3xl hover:bg-red-500 active:bg-red-600">Delete</button>
               </div>
-              
+
             </div>
           ))}
         </div>
-        <form onSubmit={handleSubmit} className=" flex flex-col space-y-[2vh] bg-white rounded-3xl p-10 px-15 mb-52" >
+        <form onSubmit={handleSubmit} className=" flex flex-col space-y-[2vh] bg-white rounded-3xl p-10 px-15 mb-52 shadow-xl" >
           <input type="text" placeholder='Add Task Title'
           className="p-2 px-[2vw] rounded-lg bg-slate-200" value={newTasks} onChange={(e) => setNewTasks(e.target.value)} />
           <button type='submit' className='bg-gray-400 mx-auto p-2 rounded-3xl hover:bg-gray-500 active:bg-gray-600 ' >Submit</button>
           {error && <p>{error}</p>}
         </form>
-        <div></div>
-        {showConfirmation && <RUSureModal message='Are you sure you want to delete this task' yesButton='Yes, delete task' noButton='No, keep task' func={deleteTask} id={deleteID} onClose={setShowConfirmation}/>}
+        <div></div>  
       </div>
+      {showConfirmation && <RUSureModal message='Are you sure you want to delete this task' yesButton='Yes, delete task' noButton='No, keep task' func={deleteTask} id={deleteID} onClose={setShowConfirmation}/>}
     </>
   )
 }
