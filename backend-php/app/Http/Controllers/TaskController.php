@@ -17,21 +17,28 @@ class TaskController extends Controller
     // POST /api/tasks
     public function store(Request $request)
     {
-        return Task::create($request->only(['title', 'completed']));
+        $validated = $request->validate([
+            'title' => 'required|string|max:50',
+            'completed' => 'boolean'
+        ]);
+        return Task::create($validated);
     }
 
     //PUT/PATCH Update all Task or sspecific task
     public function update(Request $request, $id) {
+
         $task = Task::findOrFail($id);
 
         $data = [];
 
         if($request->filled('title')) {
-            $data['title'] = $request->input(['title']);
+            $validated = $request->validate(['title' => 'sometimes|required|string|max:50',]);
+            $data['title'] = $validated['title'];
         }
 
         if($request->filled('completed')) {
-            $data['completed'] = $request->input(['completed']);
+            $validated = $request->validate(['completed' => 'sometimes|boolean']);
+            $data['completed'] = $validated['completed'];
         }
 
         if(!empty($data)) {
