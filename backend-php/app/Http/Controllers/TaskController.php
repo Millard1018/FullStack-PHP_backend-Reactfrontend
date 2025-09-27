@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\TaskRequestPatch;
+use App\Http\Requests\TaskRequestPost;
 
 class TaskController extends Controller
 {
@@ -15,41 +17,26 @@ class TaskController extends Controller
     }
 
     // POST /api/tasks
-    public function store(Request $request)
+    public function store(TaskRequestPost $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:50',
-            'completed' => 'boolean'
-        ]);
-        return Task::create($validated);
+        $validated = $request->validated();
+        $task = Task::create($validated);
+        return response()->json($task);
     }
 
     //PUT/PATCH Update all Task or sspecific task
-    public function update(Request $request, $id) {
+    public function update(TaskRequestPatch $request, $id) {
+
+        $validated = $request->validated();
 
         $task = Task::findOrFail($id);
-
-        $data = [];
-
-        if($request->filled('title')) {
-            $validated = $request->validate(['title' => 'sometimes|required|string|max:50',]);
-            $data['title'] = $validated['title'];
-        }
-
-        if($request->filled('completed')) {
-            $validated = $request->validate(['completed' => 'sometimes|boolean']);
-            $data['completed'] = $validated['completed'];
-        }
-
-        if(!empty($data)) {
-            $task->update($data);
-        }
+        $task->update($validated);
         
-        return $task;
+        return response()->json($task);
     }
 
     public function destroy($id) {
-        $task = Task::findorFail($id);
+        $task = Task::findOrFail($id);
         $task->delete();
         return response()->json(['message'=> 'Task deleted succesfully']);
     }

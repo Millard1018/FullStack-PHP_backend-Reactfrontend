@@ -26,7 +26,8 @@ function App() {
           throw new Error({error: "Something went wrong"});
         }
       } catch(err) {  
-        setTimeout(() => {setError(err.error)}, 3000)
+        setError(err.message);
+        setTimeout(() => {setError('')}, 3000);
       }
     }
 
@@ -37,17 +38,21 @@ function App() {
   function updateTask(id) {
     async function updTask() {
       try {
+        const updateData = {'completed': update.completed};
+        if (update.title) {updateData.title = update.title}
+
         const res = await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
           method: 'PATCH',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({'title': update.title, 'completed': update.completed})
+          body: JSON.stringify(updateData)
         })
         if (!res.ok) {
           throw new Error({error: 'Unable to update task'})
         }
         await getTask();
       } catch (err) {
-        setTimeout(() => {setError(err.error)}, 3000)
+        setError(err.message);
+        setTimeout(() => {setError('')}, 3000);
       }
     }
     updTask();
@@ -74,7 +79,8 @@ function App() {
         }
         await getTask();
       } catch (err) {
-        setTimeout(() => {setError(err.error)}, 3000)
+        setError(err.message);
+        setTimeout(() => {setError('')}, 3000);
       }
     }
     delTask();
@@ -97,7 +103,8 @@ function App() {
         await getTask();
         setNewTasks('');
       } catch(err) {
-        setTimeout(() => {setError(err.error)}, 3000);
+        setError(err.message);
+        setTimeout(() => {setError('')}, 3000);
       }
     }
     setTask();
