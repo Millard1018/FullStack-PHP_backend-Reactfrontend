@@ -22,13 +22,19 @@ export default function UserSignUpInPage() {
 
     const handleSignUp = (e) => {
         e.preventDefault();
+        if (!signUpForm.username || !signUpForm.email || !signUpForm.password) {
+            alert("All fields must not left blank");
+            return;
+        }
+
         if(signUpForm.password !== confirmPassword) {
             alert("Password and Confirm Password must be the same!");
+            return;
         }
 
         async function setUser() {
             try {
-                const res = await fetch('', {
+                const res = await fetch('http://127.0.0.1:8000/api/users', {
                     method: 'POST',
                     header: {'Content-type': 'application/json'},
                     body: JSON.stringify(signUpForm),
@@ -40,13 +46,20 @@ export default function UserSignUpInPage() {
                 }
             } catch (err) {
                 setError(err.message);
-                setTimeout(() => {setError('')}, 3000)
+                setTimeout(() => {setError('')}, 3000);
+                alert(err.message);
             }
         }
+        setUser();
     }
 
     const handleSignIn = (e) => {
         e.preventDefault();
+        if (!signUpForm.username || !signUpForm.email || !signUpForm.password) {
+            alert("All fields must not left blank");
+            return;
+        }
+
         async function logUser() {
             try {
                 const res = await fetch('');
