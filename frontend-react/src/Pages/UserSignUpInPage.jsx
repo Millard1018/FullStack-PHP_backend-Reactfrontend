@@ -108,6 +108,7 @@ export default function UserSignUpInPage() {
                 onClick={() => {
                     setSignUp(!signUp);
                     setSignIn(!signIn);
+
                 }}>{signUp ? "Sign in" : "Sign up"}</button></div>
             </div>
         </>
