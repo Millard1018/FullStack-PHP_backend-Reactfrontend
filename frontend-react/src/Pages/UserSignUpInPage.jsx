@@ -3,14 +3,30 @@ import { UserRound, Mail, Lock } from "lucide-react";
 
 export default function UserSignUpInPage() {
 
+    const initialForm = {
+        username: '', email: '', password: ''
+    }
+
+    function signReducer(state, action) {
+        switch(action.type) {
+            case "UPDATE FIELD":
+                return {...state, [action.payload.name]: action.payload.value}
+            case "RESET FIELD":
+                return {...state, [action.payload.name]: ''}
+            case "RESET ALL":
+                return {...initialForm}
+            default: 
+                state
+        }
+    }
+
     const [signUp, setSignUp] = useState(true);
     const [bgUrl, setBgUrl] = useState("");
-    const [signUpForm, setSignUpForm] = useState({
-        username: '', email: '', password: ''
-    });
+    const [signUpData, signUpDispatch] = useReducer(signReducer, initialForm, init=>({init}))
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const [signIn, setSignIn] = useState(false);
+    const [signInData, signInDispatch] = useReducer(signReducer, initialForm, init=>({init}))
 
     const [error, setError] = useState('');
 
@@ -36,8 +52,8 @@ export default function UserSignUpInPage() {
             try {
                 const res = await fetch('http://127.0.0.1:8000/api/users', {
                     method: 'POST',
-                    header: {'Content-type': 'application/json'},
-                    body: JSON.stringify(signUpForm),
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(signUpData),
                 })
                 if(!res.ok) {
                     const data = await res.json();
@@ -51,6 +67,8 @@ export default function UserSignUpInPage() {
             }
         }
         setUser();
+        signUpDispatch({type: "RESET ALL"})
+        setConfirmPassword('');
     }
 
     const handleSignIn = (e) => {
@@ -73,6 +91,9 @@ export default function UserSignUpInPage() {
                 setTimeout(()=>{setError('')}, 3000);
             }
         }
+
+        logUser();
+        signInDispatch({type: "RESET ALL"});
     }
  
     return (
@@ -87,13 +108,22 @@ export default function UserSignUpInPage() {
                     <div className={`flex flex-1 justify-center pt-[4vh] ${signIn ? "pt-[8vh]" : ""}`}>
                         <form className="flex flex-col space-y-5 " onSubmit={signUp ? handleSignUp : handleSignIn} >
                             <label className="flex" ><UserRound className="mr-2"/><input type="text" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Username" value={signUpForm.username} onChange={(e) => setSignUpForm(prev => ({...prev, username: e.target.value}))}  /></label>
+                            placeholder="Username" value={signUpForm.username} 
+                            onChange={(e) => {signUp ? 
+                                signUpDispatch({type: "UPDATE FIELD", payload: {name: "username", value: e.target.value} }) : 
+                                signInDispatch({type: "UPDATE FIELD", payload: {name: "username", value: e.target.value} }) 
+                            }}  /></label>
 
                             {signUp && (<label className="flex" ><Mail className="mr-2"/><input type="text" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Email" value={signUpForm.email} onChange={(e) => setSignUpForm(prev => ({...prev, email: e.target.value}))}/></label>)}
+                            placeholder="Email" value={signUpForm.email} onChange={(e) => signUpDispatch({type: "UPDATE FIELD", payload: {name: 'email', value: e.target.value} }) }/></label>)}
                             
                             <label className="flex" ><Lock className="mr-2"/><input type="password" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Password" value={signUpForm.password} onChange={(e) => setSignUpForm(prev => ({...prev, password: e.target.value}))}/></label>
+                            placeholder="Password" value={signUpForm.password} 
+                            onChange={(e) => {
+                                signUp ? 
+                                signUpDispatch({type: "UPDATE FIELD", payload: {name: 'password', value: e.target.value} }) :
+                                signUpDispatch({type: "UPDATE FIELD", payload: {name: 'password', value: e.target.value} }) 
+                            }}/></label>
 
                             {signUp && (<label className="flex" ><Lock className="mr-2"/><input type="password" className="p-1 pl-3 border rounded-3xl" 
                             placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /></label>)}
