@@ -10,4 +10,4 @@ Route::patch('/tasks/{id}', [TaskController::class, 'update']);  // update a tas
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // delete a task
 
 Route::post('/users', [UserController::class, 'signup']);
-Route::get('users', [UserController::class, 'login']);
+Route::get('/users', [UserController::class, 'login']);

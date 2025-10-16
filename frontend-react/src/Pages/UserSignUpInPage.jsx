@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useReducer } from "react";
 import { UserRound, Mail, Lock } from "lucide-react";
 
 export default function UserSignUpInPage() {
@@ -16,17 +16,18 @@ export default function UserSignUpInPage() {
             case "RESET ALL":
                 return {...initialForm}
             default: 
-                state
+                return state
         }
     }
 
     const [signUp, setSignUp] = useState(true);
     const [bgUrl, setBgUrl] = useState("");
-    const [signUpData, signUpDispatch] = useReducer(signReducer, initialForm, init=>({init}))
+    const [signUpData, signUpDispatch] = useReducer(signReducer, initialForm)
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const [signIn, setSignIn] = useState(false);
-    const [signInData, signInDispatch] = useReducer(signReducer, initialForm, init=>({init}))
+    const [signInData, signInDispatch] = useReducer(signReducer, initialForm)
+    const [dualField, setDualField] = useState('')
 
     const [error, setError] = useState('');
 
@@ -38,12 +39,12 @@ export default function UserSignUpInPage() {
 
     const handleSignUp = (e) => {
         e.preventDefault();
-        if (!signUpForm.username || !signUpForm.email || !signUpForm.password) {
+        if (!signUpData.username || !signUpData.email || !signUpData.password) {
             alert("All fields must not left blank");
             return;
         }
 
-        if(signUpForm.password !== confirmPassword) {
+        if(signUpData.password !== confirmPassword) {
             alert("Password and Confirm Password must be the same!");
             return;
         }
@@ -73,14 +74,20 @@ export default function UserSignUpInPage() {
 
     const handleSignIn = (e) => {
         e.preventDefault();
-        if (!signUpForm.username || !signUpForm.email || !signUpForm.password) {
+        if (!dualField || !signInData.password) {
             alert("All fields must not left blank");
             return;
         }
 
+        if(dualField.includes('@')) {
+            signInDispatch({type: 'UPDATE FIELD', payload: {name: 'email', value: dualField}})
+        } else {
+            signInDispatch({type: 'UPDATE FIELD', payload: {name: 'username', value: dualField}})
+        }
+
         async function logUser() {
             try {
-                const res = await fetch('');
+                const res = await fetch('http://127.0.0.1:8000/api/users');
                 if(!res.ok) {
                     const data = await res.json();
                     console.log(data.message);
@@ -108,21 +115,21 @@ export default function UserSignUpInPage() {
                     <div className={`flex flex-1 justify-center pt-[4vh] ${signIn ? "pt-[8vh]" : ""}`}>
                         <form className="flex flex-col space-y-5 " onSubmit={signUp ? handleSignUp : handleSignIn} >
                             <label className="flex" ><UserRound className="mr-2"/><input type="text" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Username" value={signUpForm.username} 
-                            onChange={(e) => {signUp ? 
-                                signUpDispatch({type: "UPDATE FIELD", payload: {name: "username", value: e.target.value} }) : 
-                                signInDispatch({type: "UPDATE FIELD", payload: {name: "username", value: e.target.value} }) 
+                            placeholder="Username" value={signUp ? signUpData.username : dualField} 
+                            onChange={(e) => { signUp ? 
+                                signUpDispatch({type: "UPDATE FIELD", payload: {name: "username", value: e.target.value} }) :
+                                setDualField(e.target.value) 
                             }}  /></label>
 
                             {signUp && (<label className="flex" ><Mail className="mr-2"/><input type="text" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Email" value={signUpForm.email} onChange={(e) => signUpDispatch({type: "UPDATE FIELD", payload: {name: 'email', value: e.target.value} }) }/></label>)}
+                            placeholder="Email" value={signUpData.email} onChange={(e) => signUpDispatch({type: "UPDATE FIELD", payload: {name: 'email', value: e.target.value} }) }/></label>)}
                             
                             <label className="flex" ><Lock className="mr-2"/><input type="password" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Password" value={signUpForm.password} 
+                            placeholder="Password" value={ signUp ? signUpData.password : signInData.password } 
                             onChange={(e) => {
                                 signUp ? 
                                 signUpDispatch({type: "UPDATE FIELD", payload: {name: 'password', value: e.target.value} }) :
-                                signUpDispatch({type: "UPDATE FIELD", payload: {name: 'password', value: e.target.value} }) 
+                                signInDispatch({type: "UPDATE FIELD", payload: {name: 'password', value: e.target.value} }) 
                             }}/></label>
 
                             {signUp && (<label className="flex" ><Lock className="mr-2"/><input type="password" className="p-1 pl-3 border rounded-3xl" 

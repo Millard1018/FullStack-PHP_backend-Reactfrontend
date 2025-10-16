@@ -3,37 +3,39 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserRequestLogin;
+use App\Http\Requests\UserRequestSignUp;
 use Illuminate\Http\Request;
-use App\Http\Requests\UserRequestPost;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class UserController extends Controller
 {
-    public function signup(UserRequestPost $request) {
+    public function signup(UserRequestSignUp $request) {
         $validated = $request->validated();
         $task = User::create($validated);
         return response()->json($task);
     }
 
-    public function login(Request $request) {
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required'
-    ]);
+    public function login(UserRequestLogin $request) {
+        $validated = $request->validated();
 
-    $user = User::where('email', $request->email)->first();
+        if($validated->email) {
+            $user = User::where('email', $validated->email)->first();
+        } else {
+            $user = User::where('email', $validated->username)->first();
+        }
 
-    if (!$user || !password_verify($request->password, $user->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
+        if (!$user || !password_verify($validated->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
 
-    $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-    return response()->json([
-        'user' => $user,
-        'token' => $token,
-    ]);
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
 }
 
 }
