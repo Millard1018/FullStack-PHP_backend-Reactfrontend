@@ -1,7 +1,7 @@
 import { useEffect, useState, useReducer } from "react";
 import { UserRound, Mail, Lock } from "lucide-react";
 
-export default function UserSignUpInPage() {
+export default function UserSignUpInPage({showTaskManager}) {
 
     const initialForm = {
         username: '', email: '', password: ''
@@ -26,10 +26,8 @@ export default function UserSignUpInPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const [signIn, setSignIn] = useState(false);
-    const [signInData, signInDispatch] = useReducer(signReducer, initialForm)
-    const [dualField, setDualField] = useState('')
-
-    const [error, setError] = useState('');
+    const [signInPassword, setSignInPassword] = useState('');
+    const [dualField, setDualField] = useState('');
 
     useEffect(() => {
         // Picsum gives a random image each time
@@ -51,7 +49,7 @@ export default function UserSignUpInPage() {
 
         async function setUser() {
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/users', {
+                const res = await fetch('http://127.0.0.1:8000/api/users/signup', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(signUpData),
@@ -62,8 +60,6 @@ export default function UserSignUpInPage() {
                     throw new Error(data.message)
                 }
             } catch (err) {
-                setError(err.message);
-                setTimeout(() => {setError('')}, 3000);
                 alert(err.message);
             }
         }
@@ -74,33 +70,39 @@ export default function UserSignUpInPage() {
 
     const handleSignIn = (e) => {
         e.preventDefault();
-        if (!dualField || !signInData.password) {
+        if (!dualField || !signInPassword) {
             alert("All fields must not left blank");
             return;
         }
 
-        if(dualField.includes('@')) {
-            signInDispatch({type: 'UPDATE FIELD', payload: {name: 'email', value: dualField}})
-        } else {
-            signInDispatch({type: 'UPDATE FIELD', payload: {name: 'username', value: dualField}})
-        }
+        const userLogInData = dualField.includes('@') ? 
+            {email: dualField, password: signInPassword} :
+            {username: dualField, password: signInPassword}
 
-        async function logUser() {
+        async function confirmUser() {
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/users');
+                const res = await fetch('http://127.0.0.1:8000/api/users/login', {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(userLogInData)
+                });
                 if(!res.ok) {
                     const data = await res.json();
                     console.log(data.message);
                     throw new Error(data.message);
+                } else { 
+                    const data = await res.json();
+                    localStorage.setItem('token', data.token);
+                    showTaskManager(true);
                 }
             } catch (err) {
-                setError(err.message)
-                setTimeout(()=>{setError('')}, 3000);
+               alert(err.message);
             }
         }
 
-        logUser();
-        signInDispatch({type: "RESET ALL"});
+        confirmUser();
+        setDualField('');
+        setSignInPassword('');
     }
  
     return (
@@ -115,7 +117,7 @@ export default function UserSignUpInPage() {
                     <div className={`flex flex-1 justify-center pt-[4vh] ${signIn ? "pt-[8vh]" : ""}`}>
                         <form className="flex flex-col space-y-5 " onSubmit={signUp ? handleSignUp : handleSignIn} >
                             <label className="flex" ><UserRound className="mr-2"/><input type="text" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Username" value={signUp ? signUpData.username : dualField} 
+                            placeholder="Username"  value={signUp ? signUpData.username : dualField} 
                             onChange={(e) => { signUp ? 
                                 signUpDispatch({type: "UPDATE FIELD", payload: {name: "username", value: e.target.value} }) :
                                 setDualField(e.target.value) 
@@ -125,11 +127,11 @@ export default function UserSignUpInPage() {
                             placeholder="Email" value={signUpData.email} onChange={(e) => signUpDispatch({type: "UPDATE FIELD", payload: {name: 'email', value: e.target.value} }) }/></label>)}
                             
                             <label className="flex" ><Lock className="mr-2"/><input type="password" className="p-1 pl-3 border rounded-3xl" 
-                            placeholder="Password" value={ signUp ? signUpData.password : signInData.password } 
+                            placeholder="Password" value={ signUp ? signUpData.password : signInPassword } 
                             onChange={(e) => {
                                 signUp ? 
                                 signUpDispatch({type: "UPDATE FIELD", payload: {name: 'password', value: e.target.value} }) :
-                                signInDispatch({type: "UPDATE FIELD", payload: {name: 'password', value: e.target.value} }) 
+                                setSignInPassword(e.target.value)
                             }}/></label>
 
                             {signUp && (<label className="flex" ><Lock className="mr-2"/><input type="password" className="p-1 pl-3 border rounded-3xl" 
@@ -147,7 +149,7 @@ export default function UserSignUpInPage() {
                     setSignIn(!signIn);
 
                 }}>{signUp ? "Sign in" : "Sign up"}</button></div>
-            </div>
+            </div> 
         </>
     )
 }

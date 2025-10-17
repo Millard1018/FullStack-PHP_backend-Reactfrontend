@@ -27,4 +27,15 @@ class UserRequestLogin extends FormRequest
             'password' => ['required', 'string', 'min:8']
         ];
     }
+
+    public function message(): array 
+    {
+        return [
+            'username.required_without:email' => 'username or email is required',
+            'email.required_without:email' => 'username or email is required',
+            'password.required' => 'password is required',
+            'username.minimun' => 'minimum length of username is 5 characters',
+            'password.minimun' => 'minimum length of username is 8 characters',
+        ];
+    }
 }

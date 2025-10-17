@@ -5,7 +5,6 @@ import RUSureModal from '../Components/RUSureModal'
 export default function UserTask() {
 
   const [tasks, setTasks] = useState([]);
-  const [error, setError] = useState(null);
   const [editTask, setEditTask] = useState('');
   const [newTasks, setNewTasks] = useState('');
   const [update, setUpdate] = useState({
@@ -18,7 +17,10 @@ export default function UserTask() {
 
   async function getTask() {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/tasks");
+        const token = localStorage.getItem('token');
+        const res = await fetch("http://127.0.0.1:8000/api/tasks", {
+          method: 'GET', headers: {'Authorization': `Bearer ${token}`}
+        });
         if (res.ok) {
           const data = await res.json();
           setTasks(data);
@@ -28,8 +30,7 @@ export default function UserTask() {
           throw new Error(data.message);
         }
       } catch(err) {  
-        setError(err.message);
-        setTimeout(() => {setError('')}, 3000);
+        alert(err.message);
       }
     }
 
@@ -40,12 +41,16 @@ export default function UserTask() {
   function updateTask(id) {
     async function updTask() {
       try {
+        const token = localStorage.getItem('token')
         const updateData = {'completed': update.completed};
         if (update.title) {updateData.title = update.title}
 
         const res = await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
           method: 'PATCH',
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(updateData)
         })
         if (!res.ok) {
@@ -53,15 +58,14 @@ export default function UserTask() {
           console.log(data.message);
           throw new Error(data.message);
         }
-        await getTask();
       } catch (err) {
-        setError(err.message);
-        setTimeout(() => {setError('')}, 3000);
+        alert(err.message)
       }
     }
     updTask();
     setUpdate(prev => ({...prev, 'id': '', 'title': '', 'completed': false}));
     setEditTask('');
+    setCheckbox(false);
     setRefresh(!refresh);
   }
 
@@ -77,7 +81,11 @@ export default function UserTask() {
   function deleteTask(id) {
     async function delTask() {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {method: 'DELETE'})
+        const token = localStorage.getItem('token')
+        const res = await fetch(`http://127.0.0.1:8000/api/tasks/${id}`, {
+          method: 'DELETE',
+          headers : {'Authorization': `Bearer ${token}`}
+        })
         if (!res.ok) {
           const data = await res.json();
           console.log(data.message);
@@ -86,11 +94,8 @@ export default function UserTask() {
           const data = await res.json();
           console.log(data.message)
         }
-        await getTask();
       } catch (err) {
-        setError(err.message);
-        console.log(err.message);
-        setTimeout(() => {setError('')}, 3000);
+        alert(err.message)
       }
     }
     delTask();
@@ -102,9 +107,13 @@ export default function UserTask() {
     e.preventDefault();
     async function setTask() {
       try {
+        const token = localStorage.getItem('token')
         const res = await fetch("http://127.0.0.1:8000/api/tasks", {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({'title': newTasks, 'completed': false}),
         })
         if(!res.ok) {
@@ -112,14 +121,13 @@ export default function UserTask() {
           console.log(data.message);
           throw new Error(data.message);
         }
-        await getTask();
-        setNewTasks('');
+        
       } catch(err) {
-        setError(err.message);
-        setTimeout(() => {setError('')}, 3000);
+        alert(err.message);
       }
     }
     setTask();
+    setNewTasks('');
     setRefresh(!refresh);
   }
 
@@ -168,7 +176,6 @@ export default function UserTask() {
           <input type="text" placeholder='Add Task Title'
           className="p-2 px-[2vw] rounded-lg bg-slate-200" value={newTasks} onChange={(e) => setNewTasks(e.target.value)} />
           <button type='submit' className='bg-gray-400 mx-auto p-2 rounded-3xl hover:bg-gray-500 active:bg-gray-600 ' >Submit</button>
-          {error && <p>{error}</p>}
         </form>
         <div></div>  
       </div>

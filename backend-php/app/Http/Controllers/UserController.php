@@ -20,13 +20,13 @@ class UserController extends Controller
     public function login(UserRequestLogin $request) {
         $validated = $request->validated();
 
-        if($validated->email) {
-            $user = User::where('email', $validated->email)->first();
+        if (isset($validated['email'])) {
+            $user = User::where('email', $validated['email'])->first();
         } else {
-            $user = User::where('email', $validated->username)->first();
+            $user = User::where('username', $validated['username'])->first();
         }
 
-        if (!$user || !password_verify($validated->password, $user->password)) {
+        if (!$user || !password_verify($validated['password'], $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
