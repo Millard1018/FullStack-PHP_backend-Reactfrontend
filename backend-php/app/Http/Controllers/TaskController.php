@@ -11,17 +11,18 @@ use App\Http\Requests\TaskRequestPost;
 class TaskController extends Controller
 {
     // GET /api/tasks
-    public function index()
+    public function index(Request $request)
     {
-        return Task::all();
+        $task = $request->user()->tasks;
+        return response()->json(['message'=> 'fetch succesfully', 'task'=> $task], 201);
     }
 
     // POST /api/tasks
     public function store(TaskRequestPost $request)
     {
         $validated = $request->validated();
-        $task = Task::create($validated);
-        return response()->json($task);
+        $task = $request->user()->tasks()->create($validated);
+        return response()->json(['message'=> 'Task stored succesfully', 'task'=> $task], 201);
     }
 
     //PUT/PATCH Update all Task or sspecific task
@@ -29,14 +30,14 @@ class TaskController extends Controller
 
         $validated = $request->validated();
 
-        $task = Task::findOrFail($id);
+        $task = $request->user()->tasks()->findOrFail($id);
         $task->update($validated);
         
-        return response()->json($task);
+        return response()->json(['message'=> 'Task updated succesfully', 'task'=> $task], 201);
     }
 
-    public function destroy($id) {
-        $task = Task::findOrFail($id);
+    public function destroy(Request $request, $id) {
+        $task = $request->user()->tasks()->findOrFail($id);
         $task->delete();
         return response()->json(['message'=> 'Task deleted succesfully']);
     }

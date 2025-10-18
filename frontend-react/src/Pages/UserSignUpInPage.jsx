@@ -25,7 +25,6 @@ export default function UserSignUpInPage({showTaskManager}) {
     const [signUpData, signUpDispatch] = useReducer(signReducer, initialForm)
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const [signIn, setSignIn] = useState(false);
     const [signInPassword, setSignInPassword] = useState('');
     const [dualField, setDualField] = useState('');
 
@@ -114,7 +113,7 @@ export default function UserSignUpInPage({showTaskManager}) {
                         <h1 className="font-bold text-[2.5em] pt-[2vh] flex justify-center" >{signUp ? "Sign up" : "Sign in"}</h1>
                         <h2 className="font-semibold text-[0.8em] pt-[1vh] flex justify-center" >{signUp ? "Sign up" : "Sign in"} to continue</h2>
                     </div>
-                    <div className={`flex flex-1 justify-center pt-[4vh] ${signIn ? "pt-[8vh]" : ""}`}>
+                    <div className={`flex flex-1 justify-center pt-[4vh] ${!signUp ? "pt-[8vh]" : ""}`}>
                         <form className="flex flex-col space-y-5 " onSubmit={signUp ? handleSignUp : handleSignIn} >
                             <label className="flex" ><UserRound className="mr-2"/><input type="text" className="p-1 pl-3 border rounded-3xl" 
                             placeholder="Username"  value={signUp ? signUpData.username : dualField} 
@@ -139,16 +138,12 @@ export default function UserSignUpInPage({showTaskManager}) {
                             
                             <button type="submit" className="bg-blue-500 w-fit mx-auto px-3 py-2 rounded-3xl hover:font-semibold hover:bg-blue-600 active:opacity-60" >{signUp ? "Sign up" : "Sign in"}</button>
 
-                            {signIn && (<button className="pt-10 w-fit mx-auto hover:text-blue-400 hover:border hover:border-b-blue-400 active:opacity-60">Forgot Password</button>)}
+                            {!signUp && (<button className="pt-10 w-fit mx-auto hover:text-blue-400 hover:border hover:border-b-blue-400 active:opacity-60">Forgot Password</button>)}
                         </form>
                     </div>
                 </div>
                 <div className="absolute flex bottom-[15vh]" ><p className="pr-2">{signUp ? "Already have an account?" : "Don't have an account?"}</p><button className="border-0 border-b-2 border-blue-400 text-blue-400 hover:text-blue-600 hover:border-blue-600 active:opacity-60" 
-                onClick={() => {
-                    setSignUp(!signUp);
-                    setSignIn(!signIn);
-
-                }}>{signUp ? "Sign in" : "Sign up"}</button></div>
+                onClick={() => {setSignUp(prev => !prev);}}>{signUp ? "Sign in" : "Sign up"}</button></div>
             </div> 
         </>
     )

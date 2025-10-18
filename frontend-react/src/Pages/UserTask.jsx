@@ -23,7 +23,7 @@ export default function UserTask() {
         });
         if (res.ok) {
           const data = await res.json();
-          setTasks(data);
+          setTasks(data.task);
         } else {
           const data = await res.json();
           console.log(data.message);
@@ -107,7 +107,7 @@ export default function UserTask() {
     e.preventDefault();
     async function setTask() {
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('token');
         const res = await fetch("http://127.0.0.1:8000/api/tasks", {
           method: 'POST',
           headers: {

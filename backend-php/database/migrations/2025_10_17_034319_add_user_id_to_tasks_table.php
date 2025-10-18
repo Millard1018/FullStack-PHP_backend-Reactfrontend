@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('tasks', function (Blueprint $table) {
             // Add user_id column and foreign key
             $table->foreignId('user_id')
-                  ->nullable() // Make it nullable so migration doesn’t fail on existing data
+                  //->nullable() // Make it nullable so migration doesn’t fail on existing data
                   ->constrained('users')
                   ->onDelete('cascade');
         });
